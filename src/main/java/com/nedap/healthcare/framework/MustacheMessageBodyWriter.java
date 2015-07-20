@@ -3,7 +3,10 @@ package com.nedap.healthcare.framework;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
+import org.glassfish.jersey.server.ContainerResponse;
 
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.*;
@@ -43,14 +46,16 @@ public class MustacheMessageBodyWriter implements MessageBodyWriter<Object> {
 
     @Override
     public void writeTo(Object o, Class<?> aClass, Type type, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream outputStream) throws IOException, WebApplicationException {
-        String path = uri.getPath();
-        String method = request.getMethod();
+        //String path = uri.getPath();
+        //String method = request.getMethod();
 
-        // need path resolving convention based on Path annotation, method and path
-
-        Mustache mustache = factory.compile("templates/index.mustache");
+        Mustache mustache = factory.compile(getTemplatePath(httpHeaders));
         //Charset encoding = setContentType(mediaType, httpHeaders);
         // httpHeaders.get("Content-Type"); // set encoding
         mustache.execute(new OutputStreamWriter(outputStream, Charset.forName("UTF-8")), o).flush();
+    }
+
+    private String getTemplatePath(MultivaluedMap<String, Object> httpHeaders) {
+        return String.format("templates/%s.mustache", (String) httpHeaders.remove("x-mustache-template").get(0));
     }
 }
