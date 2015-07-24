@@ -1,6 +1,6 @@
 package com.nedap.healthcare;
 
-import com.nedap.healthcare.framework.MustacheResource;
+import com.nedap.healthcare.framework.TemplateResource;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -11,7 +11,7 @@ import javax.ws.rs.core.Response;
 /**
  * Created by wout.slakhorst on 24/07/15.
  */
-public class SubResource extends MustacheResource {
+public class SubResource extends TemplateResource {
 
     private Long mainId;
 

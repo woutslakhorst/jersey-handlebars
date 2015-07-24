@@ -5,9 +5,9 @@ import javax.ws.rs.core.*;
 /**
  * Created by wout.slakhorst on 20/07/15.
  */
-public class MustacheResource {
+public class TemplateResource {
 
-    public static final String TEMPLATE_HEADER = "x-mustache-template";
+    public static final String TEMPLATE_HEADER = "x-template";
 
     private UriInfo uriInfo;
     private Request request;
@@ -28,9 +28,9 @@ public class MustacheResource {
         return Response.serverError().header(TEMPLATE_HEADER, "DEFAULT/500");
     }
 
-    protected <T extends MustacheResource> T delegateTo(Class<T> clazz) {
+    protected <T extends TemplateResource> T delegateTo(Class<T> clazz) {
         try {
-            MustacheResource subResource = clazz.newInstance();
+            TemplateResource subResource = clazz.newInstance();
             return (T) subResource.setUriInfo(uriInfo).setRequest(request);
         } catch (IllegalAccessException | InstantiationException e) {
             // todo: redirect to error resource with fixed template path
@@ -39,13 +39,13 @@ public class MustacheResource {
     }
 
     @Context
-    public MustacheResource setUriInfo(UriInfo uriInfo) {
+    public TemplateResource setUriInfo(UriInfo uriInfo) {
         this.uriInfo = uriInfo;
         return this;
     }
 
     @Context
-    public MustacheResource setRequest(Request request) {
+    public TemplateResource setRequest(Request request) {
         this.request = request;
         return this;
     }

@@ -1,12 +1,10 @@
 package com.nedap.healthcare.framework;
 
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheFactory;
-import org.glassfish.jersey.server.ContainerResponse;
+import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Template;
+import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
+import com.github.jknack.handlebars.io.TemplateLoader;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.*;
@@ -24,9 +22,15 @@ import java.nio.charset.Charset;
  */
 @Provider
 @Produces("text/html")
-public class MustacheMessageBodyWriter implements MessageBodyWriter<Object> {
+public class HandlebarsMessageBodyWriter implements MessageBodyWriter<Object> {
 
-    private final MustacheFactory factory = new DefaultMustacheFactory();
+    private static final TemplateLoader loader = new ClassPathTemplateLoader();
+    private static final Handlebars handlebars;
+    static {
+        loader.setPrefix("/templates");
+        loader.setSuffix(".hbs");
+        handlebars = new Handlebars(loader);
+    }
 
     @Context
     private UriInfo uri;
@@ -49,13 +53,16 @@ public class MustacheMessageBodyWriter implements MessageBodyWriter<Object> {
         //String path = uri.getPath();
         //String method = request.getMethod();
 
-        Mustache mustache = factory.compile(getTemplatePath(httpHeaders));
+        String path = getTemplatePath(httpHeaders);
+        Template template = handlebars.compile(path);
         //Charset encoding = setContentType(mediaType, httpHeaders);
         // httpHeaders.get("Content-Type"); // set encoding
-        mustache.execute(new OutputStreamWriter(outputStream, Charset.forName("UTF-8")), o).flush();
+        OutputStreamWriter writer = new OutputStreamWriter(outputStream, Charset.forName("UTF-8"));
+        template.apply(o, writer);
+        writer.flush();
     }
 
     private String getTemplatePath(MultivaluedMap<String, Object> httpHeaders) {
-        return String.format("templates/%s.mustache", (String) httpHeaders.remove("x-mustache-template").get(0));
+        return (String) httpHeaders.remove(TemplateResource.TEMPLATE_HEADER).get(0);
     }
 }
