@@ -11,6 +11,11 @@ import javax.ws.rs.core.Response;
 @Path("hello")
 public class HelloWorld extends MustacheResource {
 
+    @Path("{id}/sub")
+    public SubResource getSubResource(@PathParam("id") Long id) {
+        return delegateTo(SubResource.class).setMainId(id);
+    }
+
     @GET
     @Produces({"text/html", "application/json", "application/xml"})
     public Response index() {
@@ -22,6 +27,13 @@ public class HelloWorld extends MustacheResource {
     @Produces({"text/html", "application/json", "application/xml"})
     public Response show(@PathParam("id") Long id) {
         return ok(new Greeting()).build();
+    }
+
+    @GET
+    @Path("redirect")
+    @Produces({"text/html", "application/json", "application/xml"})
+    public Response redirect() {
+        return okWithTemplate(new Greeting(),"hello/index").build();
     }
 
     @GET
